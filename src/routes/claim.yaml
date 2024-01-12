@@ -1,0 +1,300 @@
+tags:
+  - name: claim
+    description: Everything about Claim
+
+paths:
+  /users/{userID}/claims:
+    post:
+      tags:
+        - claim
+      summary: Create a claim on user.
+      description: Create a claim on user in the database.
+      parameters:
+        - name: userID
+          in: path
+          schema:
+            type: string
+          description: The user ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Claim'
+            examples:
+              claim:
+                $ref: '#/components/examples/ClaimRequest'
+      responses:
+        '201':
+          description: Created. Response body contains a created claim.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claim:
+                    $ref: '#/components/schemas/Claim'
+              examples:
+                claim:
+                  allOf:
+                    - $ref: '#/components/examples/ClaimRequest'
+                    - $ref: '#/components/examples/ClaimResponse'
+
+  /claims/{id}:
+    get:
+      tags:
+        - claim
+      summary: Get a claim.
+      description: Get a claim from the database.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The claim ID.
+          required: true
+      responses:
+        '200':
+          description: OK. Response body contains a claim.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claim:
+                    $ref: '#/components/schemas/Claim'
+              examples:
+                claim:
+                  allOf:
+                    - $ref: '#/components/examples/ClaimRequest'
+                    - $ref: '#/components/examples/ClaimResponse'
+        '404':
+          description: Not found. Response body contains an error message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The error message.
+                    example: No claim found with that ID.
+    patch:
+      tags:
+        - claim
+      summary: Update a claim.
+      description: Update a claim in the database.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The claim ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Claim'
+            examples:
+              claim:
+                allOf:
+                  - $ref: '#/components/examples/ClaimRequest'
+                  - $ref: '#/components/examples/ClaimResponse'
+      responses:
+        '200':
+          description: OK. Response body contains an updated claim.
+
+  /claims:
+    get:
+      tags:
+        - claim
+      summary: Get all claims from the DB
+      description: This endpoint return all claims for admin, for user just his own claims. Also results depends on query params for admin. Also if you didn't send query params, you will get all claims with default limit
+      parameters:
+        - name: number
+          in: query
+          schema:
+            type: string
+          required: false
+          description: Claim number
+        - name: employer
+          in: query
+          schema:
+            type: string
+          required: false
+          description: Employer name
+        - name: status
+          in: query
+          schema:
+            type: string
+          required: false
+          description: Claim status
+        - name: limit
+          in: query
+          schema:
+            type: number
+            default: 10
+          required: false
+          description: Maximum claims in response
+        - name: page
+          in: query
+          schema:
+            type: number
+            default: 1
+          required: false
+          description: Current page of results on UI
+      responses:
+        '200':
+          description: All claims as a search result. If no claim was found, response will have 'data' and 'metadata' properties as empty arrays.
+          content:
+            application/json:
+              examples:
+                claims:
+                  $ref: '#/components/examples/ClaimSearchResponse'
+
+components:
+  schemas:
+    Claim:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The claim ID.
+          example: 12923790-f765-48c1-952c-5a9a7b8adee1
+        consumerID:
+          type: string
+          description: The consumer ID.
+          example: f24ad404-f09a-4c4e-a3fe-74a775b2fed7
+        planID:
+          type: string
+          description: The plan ID.
+          example: f24ad404-f09a-4c4e-a3fe-14a663b1fcb2
+        number:
+          type: string
+          description: The claim number.
+          example: LT20221124L00001
+        startDate:
+          type: string
+          description: The claim's start date.
+          example: 2022-11-24T17:09:58+0000
+        amount:
+          type: number
+          description: The claim's amout.
+          example: 100
+        status:
+          type: string
+          description: The claim's status.
+          example: pending
+      required:
+        - 'planID'
+        - 'startDate'
+        - 'amount'
+
+  examples:
+    ClaimRequest:
+      value:
+        {
+          'startDate': '2022-12-02T17:09:58+0000',
+          'planID': 'ef5951da-c14b-4b9c-9703-65c008e2c118',
+          'amount': 333
+        }
+    ClaimResponse:
+      value:
+        {
+          'consumerID': 'ab40f0cf-c758-4b9f-b5cb-e4836792f381',
+          'number': 'LT20221124L00001',
+          'startDate': '2022-12-02T17:09:58+0000',
+          'amount': 333,
+          'status': 'denied',
+          'id': '5d0f3a8f-7617-4e21-a63a-d662427e8555',
+          'planID': 'ef5951da-c14b-4b9c-9703-65c008e2c118',
+          'consumer':
+            {
+              'username': 'testuotojas',
+              'email': 'testuotojas@example.com',
+              'role': 'consumer',
+              'firstName': 'Testuotojas',
+              'lastName': 'Consumeris',
+              'SSN': '123456777',
+              'phone': '+370 68611012',
+              'street': 'Consumer St.',
+              'city': 'Vilnius',
+              'state': 'Vilnius',
+              'zipCode': '55555',
+              'employerID': 'd5145d0b-5217-430c-8b2e-0857b2acfb41',
+              'id': 'ab40f0cf-c758-4b9f-b5cb-e4836792f381',
+              'employer':
+                {
+                  'name': 'LA - Coherent Solutions',
+                  'code': 'LT',
+                  'street': 'hisug uorut',
+                  'city': 'Kauans',
+                  'phone': '+370699 22332200',
+                  'id': 'd5145d0b-5217-430c-8b2e-0857b2acfb41'
+                }
+            },
+          'plan':
+            {
+              'name': 'Test Dental Insurance',
+              'type': 'dental',
+              'contributions': 2000,
+              'startDate': '2022-10-11T11:34:40+0000',
+              'endDate': '2022-11-11T11:34:40+0000',
+              'payrollFrequency': 'weekly',
+              'id': 'ef5951da-c14b-4b9c-9703-65c008e2c118'
+            }
+        }
+    ClaimSearchResponse:
+      value:
+        {
+          'metadata': [{ 'numberOfDocuments': 1, 'page': 1, 'pageSize': 10 }],
+          'data':
+            [
+              {
+                'consumerID': 'ab40f0cf-c758-4b9f-b5cb-e4836792f381',
+                'number': 'LT20221124L00001',
+                'startDate': '2022-12-02T17:09:58+0000',
+                'amount': 333,
+                'status': 'denied',
+                'id': '5d0f3a8f-7617-4e21-a63a-d662427e8555',
+                'planID': 'ef5951da-c14b-4b9c-9703-65c008e2c118',
+                'plan':
+                  {
+                    'name': 'Test Dental Insurance',
+                    'type': 'dental',
+                    'contributions': 2000,
+                    'startDate': '2022-10-11T11:34:40+0000',
+                    'endDate': '2022-11-11T11:34:40+0000',
+                    'payrollFrequency': 'weekly',
+                    'id': 'ef5951da-c14b-4b9c-9703-65c008e2c118'
+                  },
+                'consumer':
+                  {
+                    'username': 'testuotojas',
+                    'email': 'testuotojas@example.com',
+                    'firstName': 'Testuotojas',
+                    'lastName': 'Consumeris',
+                    'SSN': '123456777',
+                    'phone': '+370 68611012',
+                    'street': 'Consumer St.',
+                    'city': 'Vilnius',
+                    'state': 'Vilnius',
+                    'zipCode': '55555',
+                    'employerID': 'd5145d0b-5217-430c-8b2e-0857b2acfb41',
+                    'id': 'ab40f0cf-c758-4b9f-b5cb-e4836792f381'
+                  },
+                'employer':
+                  {
+                    'name': 'LA - Coherent Solutions',
+                    'code': 'LT',
+                    'street': 'hisug uorut',
+                    'city': 'Kauans',
+                    'phone': '+370699 22332200',
+                    'id': 'd5145d0b-5217-430c-8b2e-0857b2acfb41'
+                  }
+              }
+            ]
+        }

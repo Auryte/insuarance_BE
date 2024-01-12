@@ -1,0 +1,301 @@
+tags:
+  - name: plan
+    description: Everything about Plan
+
+paths:
+  /employers/{employerID}/plans:
+    get:
+      tags:
+        - plan
+      summary: Get the plans.
+      description: Get a plans from the database for current employer.
+      parameters:
+        - name: employerID
+          in: path
+          schema:
+            type: string
+          description: The employer ID.
+          required: true
+      responses:
+        '200':
+          description: Server returns array with plan years for employer or empty array if no plans for employer.
+          content:
+            application/json:
+              examples:
+                plans:
+                  allOf:
+                    - $ref: '#/components/examples/PlanRequest'
+                    - $ref: '#/components/examples/PlanResponse'
+    post:
+      tags:
+        - plan
+      summary: Create a plan.
+      description: Create a plan in the database.
+      parameters:
+        - name: employerID
+          in: path
+          schema:
+            type: string
+          description: The employer ID.
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The plan ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plan'
+            examples:
+              plan:
+                $ref: '#/components/examples/PlanRequest'
+      responses:
+        '201':
+          description: Created. Response body contains a created plan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan:
+                    $ref: '#/components/schemas/Plan'
+              examples:
+                plan:
+                  allOf:
+                    - $ref: '#/components/examples/PlanRequest'
+                    - $ref: '#/components/examples/PlanResponse'
+  /employers/{employerID}/plans/{id}:
+    get:
+      tags:
+        - plan
+      summary: Get a plan.
+      description: Get a plan from the database.
+      parameters:
+        - name: employerID
+          in: path
+          schema:
+            type: string
+          description: The employer ID.
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The plan ID.
+          required: true
+      responses:
+        '200':
+          description: OK. Response body contains a plan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan:
+                    $ref: '#/components/schemas/Plan'
+              examples:
+                plan:
+                  allOf:
+                    - $ref: '#/components/examples/PlanRequest'
+                    - $ref: '#/components/examples/PlanResponse'
+        '404':
+          description: Not found. Response body contains an error message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The error message.
+                    example: No plan found with that ID.
+    patch:
+      tags:
+        - plan
+      summary: Update a plan.
+      description: Update a plan in the database.
+      parameters:
+        - name: employerID
+          in: path
+          schema:
+            type: string
+          description: The employer ID.
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The plan ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plan'
+            examples:
+              plan:
+                $ref: '#/components/examples/PlanRequest'
+      responses:
+        '200':
+          description: OK. Response body contains an updated plan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan:
+                    $ref: '#/components/schemas/Plan'
+              examples:
+                plan:
+                  allOf:
+                    - $ref: '#/components/examples/PlanRequest'
+                    - $ref: '#/components/examples/PlanResponse'
+    delete:
+      tags:
+        - plan
+      summary: Delete a plan.
+      description: Delete a plans from the database for current employer by plan ID.
+      parameters:
+        - name: employerID
+          in: path
+          schema:
+            type: string
+          description: The employer ID.
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The plan ID.
+          required: true
+      responses:
+        '200':
+          description: Server returns a message about successful removal.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Information message.
+                    example: Plan deleted successfully.
+        '404':
+          description: Server returns a error message if there is no plan with sended id in DB.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: No plan found with that ID.
+  /employers/{employerID}/plans/{id}/initialize:
+    patch:
+      tags:
+        - plan
+      summary: Initialize a plan.
+      description: Initialize a plan on the server side and return initialized.
+      parameters:
+        - name: employerID
+          in: path
+          schema:
+            type: string
+          description: The employer ID.
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The plan ID.
+          required: true
+      responses:
+        '200':
+          description: OK. Response body contains an initialized plan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan:
+                    $ref: '#/components/schemas/Plan'
+              examples:
+                plan:
+                  allOf:
+                    - $ref: '#/components/examples/PlanRequest'
+                    - $ref: '#/components/examples/PlanResponse'
+components:
+  schemas:
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The plan ID.
+          example: 44d63010-57b9-436d-a1b4-3612f0976q9c
+        name:
+          type: string
+          description: The plan's name.
+          example: Test Dental Insurance
+        type:
+          type: string
+          description: The plan's type.
+          enum: [medical, dental]
+          example: dental
+        contributions:
+          type: number
+          description: The plan's contributions.
+          example: 2000
+        startDate:
+          type: string
+          description: The plan's start date.
+          example: 2022-10-11T11:34:40+0000
+        endDate:
+          type: string
+          description: The plan's end date.
+          example: 2022-11-11T11:34:40+0000
+        payrollFrequency:
+          type: string
+          description: The plan's payroll frequency.
+          enum: [weekly, monthly]
+          example: weekly
+        initialized:
+          type: boolean
+          description: The plan's initialized status.
+          example: false
+        initializedAt:
+          type: Date
+          description: The plan's initialized date.
+          example: null
+      required:
+        - 'name'
+        - 'type'
+        - 'contributions'
+        - 'startDate'
+        - 'endDate'
+        - 'payrollFrequency'
+
+  examples:
+    PlanRequest:
+      value:
+        {
+          'name': 'Test Medical Insurance',
+          'type': 'medical',
+          'contributions': 1000,
+          'startDate': '2022-10-11T11:34:40+0000',
+          'endDate': '2022-11-11T11:34:40+0000',
+          'payrollFrequency': 'weekly'
+        }
+    PlanResponse:
+      value:
+        {
+          'id': '6bc846ed-77e7-466b-aabd-003eaf8cee53',
+          'initialized': true,
+          'initializedAt': '2022-11-11T11:34:40.256Z'
+        }

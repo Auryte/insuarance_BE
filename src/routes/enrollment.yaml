@@ -1,0 +1,251 @@
+tags:
+  - name: enrollment
+    description: Everything about Enrollment
+
+paths:
+  /users/{userID}/enrollments:
+    post:
+      tags:
+        - enrollment
+      summary: Create an enrollment on user.
+      description: Create an enrollment on user in the database.
+      parameters:
+        - name: userID
+          in: path
+          schema:
+            type: string
+          description: The user ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+            examples:
+              enrollment:
+                $ref: '#/components/examples/EnrollmentRequest'
+      responses:
+        '201':
+          description: Created. Response body contains a created enrollment.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enrollment:
+                    $ref: '#/components/schemas/Enrollment'
+              examples:
+                enrollment:
+                  allOf:
+                    - $ref: '#/components/examples/EnrollmentRequest'
+                    - $ref: '#/components/examples/EnrollmentResponse'
+    get:
+      tags:
+        - enrollment
+      summary: Get all enrollments from the DB.
+      description: Get all enrollments for a particular user from the DB.
+      parameters:
+        - name: userID
+          in: path
+          schema:
+            type: string
+          description: The user ID.
+          required: true
+      responses:
+        '200':
+          description: Response body contains a list of enrollments. If no enrollment was found, response will be an empty array.
+          content:
+            application/json:
+              examples:
+                enrollments:
+                  $ref: '#/components/examples/EnrollmentsResponse'
+
+  /users/{userID}/enrollments/{id}:
+    get:
+      tags:
+        - enrollment
+      summary: Get an enrollment.
+      description: Get an enrollment from the database.
+      parameters:
+        - name: userID
+          in: path
+          schema:
+            type: string
+          description: The user ID.
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The enrollment ID.
+          required: true
+      responses:
+        '200':
+          description: OK. Response body contains an enrollment.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enrollment:
+                    $ref: '#/components/schemas/Enrollment'
+              examples:
+                enrollment:
+                  allOf:
+                    - $ref: '#/components/examples/EnrollmentRequest'
+                    - $ref: '#/components/examples/EnrollmentResponse'
+        '404':
+          description: Not found. Response body contains an error message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The error message.
+                    example: No enrollment found with that ID.
+    patch:
+      tags:
+        - enrollment
+      summary: Update an enrollment.
+      description: Update an enrollment in the database.
+      parameters:
+        - name: userID
+          in: path
+          schema:
+            type: string
+          description: The user ID.
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The enrollment ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Enrollment'
+            examples:
+              enrollment:
+                allOf:
+                  - $ref: '#/components/examples/EnrollmentRequest'
+                  - $ref: '#/components/examples/EnrollmentResponse'
+      responses:
+        '200':
+          description: OK. Response body contains an updated enrollment.
+
+components:
+  schemas:
+    Enrollment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The enrollment ID.
+          example: 478fb9eb-172a-4cd7-94d8-1958996a7281
+        consumerID:
+          type: string
+          description: The consumer ID.
+          example: f8987948-7acb-4839-a3b2-52128e42a2b4
+        planID:
+          type: string
+          description: The plan ID.
+          example: e6318212-24d2-484a-ad3c-d0322ed3697e
+        election:
+          type: number
+          description: The enrollment's election.
+          example: 100
+      required:
+        - 'planID'
+        - 'election'
+
+  examples:
+    EnrollmentRequest:
+      value: { 'planID': 'e6318212-24d2-484a-ad3c-d0322ed3697e', 'election': 100 }
+    EnrollmentResponse:
+      value:
+        {
+          'consumerID': 'f8987948-7acb-4839-a3b2-52128e42a2b4',
+          'planID': 'e6318212-24d2-484a-ad3c-d0322ed3697e',
+          'election': 100,
+          'id': '478fb9eb-172a-4cd7-94d8-1958996a7281',
+          'plan':
+            {
+              'name': 'Test Medical Insurance Two',
+              'type': 'medical',
+              'contributions': 2500,
+              'startDate': '2022-11-05T11:34:40+0000',
+              'endDate': '2023-12-01T11:34:40+0000',
+              'payrollFrequency': 'monthly',
+              'initialized': true,
+              'initializedAt': '2022-12-23T14:52:18.356Z',
+              'employerId': '6161a553-20f6-46ba-b7ca-7f6c55645708',
+              'id': 'e6318212-24d2-484a-ad3c-d0322ed3697e'
+            }
+        }
+    EnrollmentsResponse:
+      value:
+        [
+          {
+            'consumerID': 'f8987948-7acb-4839-a3b2-52128e42a2b4',
+            'planID': '6720f2ab-cb5e-4785-970b-b21926f3a737',
+            'election': 555,
+            'id': 'c0a290c9-b00d-4b19-b252-a54e6283e157',
+            'plan':
+              {
+                'name': 'My big uncuranse plan',
+                'type': 'medical',
+                'contributions': 33,
+                'startDate': '2022-12-13T08:15:59.720Z',
+                'endDate': '2022-12-13T21:00:00.000Z',
+                'payrollFrequency': 'weekly',
+                'initialized': false,
+                'initializedAt': null,
+                'employerId': '6161a553-20f6-46ba-b7ca-7f6c55645708',
+                'id': '6720f2ab-cb5e-4785-970b-b21926f3a737'
+              }
+          },
+          {
+            'consumerID': 'f8987948-7acb-4839-a3b2-52128e42a2b4',
+            'planID': 'f1fa6199-d8c6-43be-af62-b841bef9e07a',
+            'election': 333,
+            'id': 'a7679481-b4ca-4172-b8e7-7523cc521ca6',
+            'plan':
+              {
+                'name': 'Test Dental Insurance One',
+                'type': 'dental',
+                'contributions': 3500,
+                'startDate': '2022-12-08T11:34:40+0000',
+                'endDate': '2023-12-10T11:34:40.000Z',
+                'payrollFrequency': 'weekly',
+                'initialized': true,
+                'initializedAt': '2022-12-10T11:34:40.000Z',
+                'id': 'f1fa6199-d8c6-43be-af62-b841bef9e07a',
+                'employerId': 'f634658f-5639-4143-b9e4-2537cf30a76e'
+              }
+          },
+          {
+            'consumerID': 'f8987948-7acb-4839-a3b2-52128e42a2b4',
+            'planID': 'b86735d0-1423-48ea-a07f-ef01984adf56',
+            'election': 999,
+            'id': '478fb9eb-172a-4cd7-94d8-1958996a7281',
+            'plan':
+              {
+                'name': 'Test Medical Insurance Two',
+                'type': 'medical',
+                'contributions': 2500,
+                'startDate': '2022-11-05T11:34:40+0000',
+                'endDate': '2023-12-01T11:34:40+0000',
+                'payrollFrequency': 'monthly',
+                'initialized': true,
+                'initializedAt': '2022-12-23T14:52:18.356Z',
+                'employerId': '6161a553-20f6-46ba-b7ca-7f6c55645708',
+                'id': 'b86735d0-1423-48ea-a07f-ef01984adf56'
+              }
+          }
+        ]

@@ -1,0 +1,453 @@
+tags:
+  - name: user
+    description: Everything about User
+
+paths:
+  /users/login:
+    post:
+      tags:
+        - user
+      summary: Login.
+      description: Login and retrieve a token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The user's username.
+                  example: jsmith
+                password:
+                  type: string
+                  description: The user's password.
+                  example: Jsmith@007
+      responses:
+        '200':
+          description: OK. Response body contains a token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: The token.
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjYzNzIyYmUxZWQ5N2NlOTYwYzQ3OWU5ZCIsImZpcnN0TmFtZSI6IkpvaG4iLCJsYXN0TmFtZSI6IlNtaXRoIiwidXNlcm5hbWUiOiJqc21pdGgiLCJlbWFpbCI6ImpzbWl0aEBleGFtcGxlLmNvbSIsInJvbGUiOiJjb25zdW1lciIsImNyZWF0ZWRBdCI6IjIwMjItMTEtMTZUMTI6NDI6MzAuMTcwWiIsInVwZGF0ZWRBdCI6IjIwMjItMTEtMTZUMTI6NDI6MzAuMTcwWiIsIl9fdiI6MH0sImlhdCI6MTY2OTAyMDgxMn0.JF_q-F94VCWDteuBRbjt-HvN7KPzkAl3Dig4aAAoj64
+        '400':
+          description: Bad request. Response body contains an error message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The error message.
+                    example: Please provide username and password.
+        '401':
+          description: Unauthorized. Response body contains an error message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The error message.
+                    example: Incorrect username or password.
+
+  /users:
+    post:
+      tags:
+        - user
+      summary: Create a user.
+      description: Create a user in the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/User'
+                - $ref: '#/components/schemas/Consumer'
+            examples:
+              user:
+                $ref: '#/components/examples/UserRequest'
+              consumer:
+                $ref: '#/components/examples/ConsumerRequest'
+
+      responses:
+        '201':
+          description: Created. Response body contains a created user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    oneOf:
+                      - $ref: '#/components/schemas/User'
+                      - $ref: '#/components/schemas/Consumer'
+              examples:
+                user:
+                  allOf:
+                    - $ref: '#/components/examples/UserRequest'
+                    - $ref: '#/components/examples/UserResponse'
+                consumer:
+                  allOf:
+                    - $ref: '#/components/examples/ConsumerRequest'
+                    - $ref: '#/components/examples/ConsumerResponse'
+
+  /users/{id}:
+    get:
+      tags:
+        - user
+      summary: Get a user.
+      description: Get a user from the database.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The user ID.
+          required: true
+      responses:
+        '200':
+          description: OK. Response body contains a user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    oneOf:
+                      - $ref: '#/components/schemas/User'
+                      - $ref: '#/components/schemas/Consumer'
+              examples:
+                user:
+                  allOf:
+                    - $ref: '#/components/examples/UserRequest'
+                    - $ref: '#/components/examples/UserResponse'
+                consumer:
+                  allOf:
+                    - $ref: '#/components/examples/ConsumerRequest'
+                    - $ref: '#/components/examples/ConsumerResponse'
+        '404':
+          description: Not found. Response body contains an error message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The error message.
+                    example: No user found with that ID.
+    patch:
+      tags:
+        - user
+      summary: Update a user.
+      description: Update an employer user in the database.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The user ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            examples:
+              user:
+                allOf:
+                  - $ref: '#/components/examples/UserEmployerRequest'
+                  - $ref: '#/components/examples/UserEmployerResponse'
+      responses:
+        '200':
+          description: OK. Response body contains an updated user.
+  /users/{employerID}/users:
+    get:
+      tags:
+        - user
+      summary: Get all certain employer users from the DB
+      description: This endpoint returns all users which depends on query params. Without the query params, you will get all users with default limit
+      parameters:
+        - name: employerID
+          in: path
+          schema:
+            type: string
+          required: true
+          description: The employer's id
+        - name: firstName
+          in: query
+          schema:
+            type: string
+          required: false
+          description: The user's first name
+        - name: lastName
+          in: query
+          schema:
+            type: string
+          required: false
+          description: The user's last name
+        - name: SSN
+          in: query
+          schema:
+            type: string
+          required: false
+          description: The user's SSN code
+        - name: limit
+          in: query
+          schema:
+            type: number
+            default: 10
+          required: false
+          description: Maximum number of employers in a response
+        - name: page
+          in: query
+          schema:
+            type: number
+            default: 1
+          required: false
+          description: Current page of results on UI
+      responses:
+        '200':
+          description: Filtered users as a search result. If no user was found, response will have 'data' and 'metadata' properties as empty arrays.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  $ref: '#/components/schemas/Consumer'
+              examples:
+                users:
+                  allOf:
+                    - $ref: '#/components/examples/ConsumerRequest'
+                    - $ref: '#/components/examples/UserSearchResponse'
+  /users/{employerID}/users/upload-scv:
+    post:
+      tags:
+        - user
+      summary: Create many users.
+      description: Create many employees in the DB.
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          description: The employer ID.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/Consumer'
+            examples:
+              user:
+                allOf:
+                  - $ref: '#/components/examples/ConsumersArray'
+                  - $ref: '#/components/examples/ConsumersArray'
+      responses:
+        '200':
+          description: OK. Response body contains an created users.
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The user ID.
+          example: f24ad404-f09a-4c4e-a3fe-74a775b2fed7
+        username:
+          type: string
+          description: The user's username.
+          example: jsmith
+        email:
+          type: string
+          description: The user's email.
+          example: jsmith@example.com
+        role:
+          type: string
+          description: The user's role.
+          enum: [employer, consumer]
+          example: consumer
+        password:
+          type: string
+          description: The user's password.
+          example: Jsmith@007
+      required:
+        - 'username'
+        - 'email'
+        - 'password'
+
+    Consumer:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            firstName:
+              type: string
+              description: The user's first name.
+              example: John
+            lastName:
+              type: string
+              description: The user's last name.
+              example: Smith
+            SSN:
+              type: string
+              example: 123456789
+              description: The employee's SNN number
+            phone:
+              type: string
+              example: +370 68611012
+              description: The employee's phone number
+            street:
+              type: string
+              example: Consumer St.
+              description: The employee's home street
+            city:
+              type: string
+              example: Vilnius
+              description: The employee's home city
+            state:
+              type: string
+              example: Vilnius
+              description: The employee's home state
+            zipCode:
+              type: string
+              example: 55555
+              description: The employee's zip code
+            employerID:
+              type: string
+              example: 6161a553-20f6-46ba-b7ca-7f6c55645708
+              description: ID of the company where the employee works
+
+  examples:
+    UserRequest:
+      value:
+        {
+          'firstName': 'John',
+          'lastName': 'Smith',
+          'username': 'jsmith',
+          'email': 'jsmith@example.com',
+          'SSN': '123456789',
+          'role': 'consumer',
+          'password': 'Jsmith@007'
+        }
+    UserEmployerRequest:
+      value:
+        {
+          'firstName': 'John',
+          'lastName': 'Smith',
+          'username': 'jsmith',
+          'email': 'jsmith@example.com',
+          'role': 'consumer',
+          'password': 'Jsmith@007'
+        }
+    ConsumerRequest:
+      value:
+        {
+          'username': 'jsmith',
+          'email': 'jsmith@example.com',
+          'role': 'consumer',
+          'firstName': 'John',
+          'lastName': 'Smith',
+          'password': 'Jsmith@007',
+          'SSN': 123456789,
+          'phone': '+370 68611012',
+          'street': 'Consumer St.',
+          'city': 'Vilnius',
+          'state': 'Vilnius',
+          'zipCode': 55555,
+          'employerID': '6161a553-20f6-46ba-b7ca-7f6c55645708'
+        }
+    ConsumersArray:
+      value:
+        [
+          {
+            'username': 'jsmith',
+            'email': 'jsmith@example.com',
+            'role': 'consumer',
+            'firstName': 'John',
+            'lastName': 'Smith',
+            'password': 'Jsmith@007',
+            'SSN': 123456789,
+            'phone': '+370 68611012',
+            'street': 'Consumer St.',
+            'city': 'Vilnius',
+            'state': 'Vilnius',
+            'zipCode': 55555,
+            'employerID': '6161a553-20f6-46ba-b7ca-7f6c55645708'
+          }
+        ]
+    UserResponse:
+      value: { 'id': '44d63010-57b9-436d-a1b4-3612f0976q9c' }
+    UserEmployerResponse:
+      value:
+        {
+          'username': 'Adminas',
+          'email': 'adminas@valio.com',
+          'role': 'employer',
+          'firstName': 'EmployerAdminas',
+          'lastName': 'Adminaitis',
+          'phone': '+370 68611012',
+          'street': 'Employer St.',
+          'city': 'Vilnius',
+          'state': 'Vilnius',
+          'zipCode': '55555'
+        }
+    ConsumerResponse:
+      value:
+        {
+          'id': '44d63010-57b9-436d-a1b4-3612f0976q9c',
+          'createdAt': '2022-11-16T12:55:13.810Z',
+          'updatedAt': '2022-11-16T12:55:13.810Z',
+          '__v': 0,
+          'employer':
+            {
+              'name': 'LT - CoherentSolutions',
+              'code': 'LT',
+              'street': 'hisug uorut',
+              'city': 'Kaunas',
+              'phone': '+370 699 132230',
+              'zipCode': '45454',
+              'id': '6161a553-20f6-46ba-b7ca-7f6c55645708',
+              'state': 'Kaunas'
+            }
+        }
+      UserSearchResponse:
+        value:
+          {
+            'metadata': [{ 'numberOfDocuments': 1, 'page': 1, 'pageSize': 10 }],
+            'data':
+              [
+                {
+                  'username': 'tester',
+                  'email': 'tester@example.com',
+                  'role': 'consumer',
+                  'password': '$2b$12$zeIDCvEKDPUQf76myB.uE.IgiP68KwfMXH.Qqrd5K9XIFohrctn1a',
+                  'firstName': 'Tester',
+                  'lastName': 'Consumer',
+                  'SSN': '123456789',
+                  'phone': '+370 68611012',
+                  'street': 'Consumer St.',
+                  'city': 'Vilnius',
+                  'state': 'Vilnius',
+                  'zipCode': '55555',
+                  'employerID': '6161a553-20f6-46ba-b7ca-7f6c55645708',
+                  'id': 'f24ad404-f09a-4c4e-a3fe-74a775b2fed7'
+                }
+              ]
+          }

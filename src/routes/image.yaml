@@ -1,0 +1,36 @@
+tags:
+  - name: image
+    description: Everything about image upload
+
+paths:
+  /image/upload:
+    post:
+      tags:
+        - image
+      summary: Upload an image.
+      description: Upload an image to Cloudinary.
+      requestBody:
+        content:
+          'image/jpeg':
+            schema:
+              'type': 'object'
+              'properties': { 'file': { 'type': 'string', 'format': 'binary' } }
+            encoding: { 'file': { 'style': 'form' } }
+      responses:
+        '200':
+          description: Logo successfully uploaded.
+          content:
+            binary:
+              examples:
+                image:
+                  allOf:
+                    - $ref: '#/components/examples/ImageResponse'
+components:
+  examples:
+    ImageResponse:
+      value:
+        {
+          'status': true,
+          'message': 'Logo successfully uploaded.',
+          'data': 'https://res.cloudinary.com/dwpxztrya/image/upload/v1671466641/logo/mz41iqipldzohftdex4k.jpg'
+        }

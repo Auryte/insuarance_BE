@@ -1,0 +1,241 @@
+tags:
+  - name: employer
+    description: Everything about Employer
+
+paths:
+  /employers:
+    get:
+      tags:
+        - employer
+      summary: Get all employers from the DB
+      description: This endpoint return all employers or results depends on query params. Also if you didn't send query params, you will get all employers with default limit
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          required: false
+          description: The employer's name
+        - name: code
+          in: query
+          schema:
+            type: string
+          required: false
+          description: The employer's country code
+        - name: limit
+          in: query
+          schema:
+            type: number
+            default: 10
+          required: false
+          description: Maximum number of employers in a response
+        - name: page
+          in: query
+          schema:
+            type: number
+            default: 1
+          required: false
+          description: Current page of results on UI
+      responses:
+        '200':
+          description: All employers as a search result. If no employer was found, response will have 'data' and 'metadata' properties as empty arrays.
+          content:
+            application/json:
+              examples:
+                employers:
+                  $ref: '#/components/examples/EmployerSearchResponse'
+    post:
+      tags:
+        - employer
+      summary: Add a new employer to the DB
+      description: Add a new employer to the DB. Name and Code need to be unique.
+      requestBody:
+        description: It should accept payload with Name, Code, Street, City and Phone fields are required. State, Zip Code are not required.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employer'
+            examples:
+              employer:
+                $ref: '#/components/examples/EmployerRequest'
+        required: true
+      responses:
+        '201':
+          description: Employer was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employer'
+              examples:
+                employer:
+                  allOf:
+                    - $ref: '#/components/examples/EmployerRequest'
+                    - $ref: '#/components/examples/EmployerResponse'
+    patch:
+      tags:
+        - employer
+      summary: Update employer document in the DB
+      description: Employer id and updated body must be sent
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+          description: Id must be sent
+          required: true
+      requestBody:
+        description: It should accept payload with Name, Code, Street, City and Phone fields are required. State, Zip Code are not required.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employer'
+            examples:
+              employer:
+                $ref: '#/components/examples/EmployerRequest'
+        required: true
+      responses:
+        '200':
+          description: Employer was updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employer'
+              examples:
+                employer:
+                  allOf:
+                    - $ref: '#/components/examples/EmployerRequest'
+                    - $ref: '#/components/examples/EmployerResponse'
+
+        '404':
+          description: No employer was found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: No employer found with that ID.
+  /employers/{:id}/manage-rules:
+    patch:
+      tags:
+        - employer
+      summary: Update employer setup in the DB
+      description: Employer id and updated body must be sent
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+          description: Id must be sent
+          required: true
+      requestBody:
+        description: It should accept payload with claimFilling, addConsumers. This fields are required.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                claimFilling:
+                  type: boolean
+                addConsumers:
+                  type: boolean
+            examples:
+              employer:
+                $ref: '#/components/examples/EmployerSetup'
+        required: true
+      responses:
+        '200':
+          description: Employer rules were updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employer'
+              examples:
+                employer:
+                  allOf:
+                    - $ref: '#/components/examples/EmployerRequest'
+                    - $ref: '#/components/examples/EmployerResponse'
+
+components:
+  schemas:
+    Employer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The employer ID.
+          example: 6161a553-20f6-46ba-b7ca-7f6c55645708
+        name:
+          type: string
+          example: BY - ISsoft
+        code:
+          type: string
+          example: 'BY'
+        street:
+          type: string
+          example: Chapaeva
+        city:
+          type: string
+          example: Minsk
+        phone:
+          type: string
+          example: '375441234567'
+        zipCode:
+          type: string
+          example: '55555'
+        state:
+          type: string
+          example: 'Washington'
+        claimFilling:
+          type: boolean
+          example: true
+        addConsumers:
+          type: boolean
+          example: true
+      required:
+        - 'name'
+        - 'code'
+        - 'street'
+        - 'city'
+        - 'phone'
+        - 'claimFilling'
+        - 'addConsumers'
+
+  examples:
+    EmployerSetup:
+      value: { 'claimFilling': true, 'addConsumers': false }
+    EmployerRequest:
+      value:
+        {
+          'name': 'BY - ISsoft',
+          'code': 'BY',
+          'street': 'Chapaeva',
+          'city': 'Minsk',
+          'phone': '375441234567',
+          'zipCode': '55555',
+          'state': 'Washington',
+          'claimFilling': true,
+          'addConsumers': false
+        }
+    EmployerResponse:
+      value: { 'id': '6bc846ed-77e7-466b-aabd-003eaf8cee53' }
+    EmployerSearchResponse:
+      value:
+        {
+          'metadata': [{ 'numberOfDocuments': 1, 'page': 1, 'pageSize': 10 }],
+          'data':
+            [
+              {
+                'id': '1bd5ad7a-47f4-4bdd-a80e-02e1408cb743',
+                'name': 'BY - ISsoft',
+                'code': 'BY',
+                'street': 'Chapaeva',
+                'city': 'Minsk',
+                'phone': '375441234567',
+                'zipCode': '55555',
+                'state': 'Washington'
+              }
+            ]
+        }
